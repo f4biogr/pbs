@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Listener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #messageList {
+            list-style-type: none;
+            padding: 0;
+        }
+        #messageList li {
+            background-color: #f0f0f0;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Listener</h1>
+    <div id="status">Status: Desconectado</div>
+    <ul id="messageList"></ul>
+
+    <script>
+        const statusElement = document.getElementById('status');
+        const messageList = document.getElementById('messageList');
+        let socket;
+
+        function connectWebSocket() {
+            // Substitua a URL abaixo pela URL do seu WebSocket
+            socket = new WebSocket("wss://rt-pubsub.webpubsub.azure.com/client/hubs/HUB?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL3J0LXB1YnN1Yi53ZWJwdWJzdWIuYXp1cmUuY29tL2NsaWVudC9odWJzL0hVQiIsImlhdCI6MTcyODY5MTY3MiwiZXhwIjoxNzI5NTU1NjcyLCJ3ZWJwdWJzdWIuZ3JvdXAiOiJjaGFubmVsLXRlc3QtcHJkLTEifQ.Zu9wzhQW7BSnP1PyI_iaxO3muSovugdnLs7ymYWqvj8");
+
+            socket.onopen = function(event) {
+                statusElement.textContent = 'Status: Conectado';
+            };
+
+            socket.onmessage = function(event) {
+                const message = event.data;
+                const listItem = document.createElement('li');
+                listItem.textContent = `${new Date().toLocaleString()} - ${message}`;
+                messageList.prepend(listItem);
+            };
+
+            socket.onclose = function(event) {
+                statusElement.textContent = 'Status: Desconectado';
+                setTimeout(connectWebSocket, 5000);  // Tenta reconectar após 5 segundos
+            };
+
+            socket.onerror = function(error) {
+                console.error('Erro no WebSocket:', error);
+            };
+        }
+
+        connectWebSocket();
+    </script>
+</body>
+</html>
